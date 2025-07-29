@@ -4,14 +4,14 @@
 void makeSegDescriptor(uint8_t *mem, struct SDVals sd) {
 
 	// puts in limit values
-	mem[0] = sd.limit & 0xff;
-	mem[1] = (sd.limit >> 8) & 0xff;
+	mem[1] = sd.limit & 0xff;
+	mem[0] = (sd.limit >> 8) & 0xff;
 	mem[6] = (sd.limit >> 16) & 0xf;
 
 
 	// puts in base values
-	mem[2] = sd.base & 0xff;
-	mem[3] = (sd.base >> 8) & 0xff;
+	mem[3] = sd.base & 0xff;
+	mem[2] = (sd.base >> 8) & 0xff;
 	mem[4] = (sd.base >> 16) & 0xff;
 	mem[7] = (sd.base >> 24) & 0xff;
 
@@ -38,23 +38,23 @@ void initGDTSegments() {
 
 	// create kernel code segment
 	memStart += 2;
-	struct SDVals KCSegment = {0, 0xFFFFF, 0x9A, 0xC};
+	struct SDVals KCSegment = {0, 0xFFFFF, 0x9B, 0xC};
 	makeSegDescriptor((uint8_t*) memStart, KCSegment);
 
 	// create kernel data segment
 	memStart += 2;
-	struct SDVals KDSegment = {0, 0xFFFFF, 0x92, 0xC};
+	struct SDVals KDSegment = {0, 0xFFFFF, 0x93, 0xC};
 	makeSegDescriptor((uint8_t*) memStart, KDSegment);
 
 	// create user code segment
 	memStart += 2;
-	struct SDVals UCSegment = {0, 0xFFFFF, 0xFA, 0xC};
+	struct SDVals UCSegment = {0, 0xFFFFF, 0xFB, 0xC};
 	makeSegDescriptor((uint8_t*) memStart, UCSegment);
 
 
 	// create user data segment
 	memStart += 2;
-	struct SDVals UDSegment = {0, 0xFFFFF, 0xF2, 0xC};
+	struct SDVals UDSegment = {0, 0xFFFFF, 0xF3, 0xC};
 	makeSegDescriptor((uint8_t*) memStart, UDSegment);
 
 	// create task state segment
