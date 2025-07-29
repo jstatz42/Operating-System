@@ -1,70 +1,98 @@
+// Used for creating GDT segment descriptors in 64-bit integer form.
+ 
 #include "gdt.h"
+#include <stdint.h>
+ 
+// Each define here is for a specific flag in the descriptor.
+// Refer to the intel documentation for a description of what each one does.
+#define SEG_DESCTYPE(x)  ((x) << 0x04) // Descriptor type (0 for system, 1 for code/data)
+#define SEG_PRES(x)      ((x) << 0x07) // Present
+#define SEG_SAVL(x)      ((x) << 0x0C) // Available for system use
+#define SEG_LONG(x)      ((x) << 0x0D) // Long mode
+#define SEG_SIZE(x)      ((x) << 0x0E) // Size (0 for 16-bit, 1 for 32)
+#define SEG_GRAN(x)      ((x) << 0x0F) // Granularity (0 for 1B - 1MB, 1 for 4KB - 4GB)
+#define SEG_PRIV(x)     (((x) &  0x03) << 0x05)   // Set privilege level (0 - 3)
+ 
+#define SEG_DATA_RD        0x00 // Read-Only
+#define SEG_DATA_RDA       0x01 // Read-Only, accessed
+#define SEG_DATA_RDWR      0x02 // Read/Write
+#define SEG_DATA_RDWRA     0x03 // Read/Write, accessed
+#define SEG_DATA_RDEXPD    0x04 // Read-Only, expand-down
+#define SEG_DATA_RDEXPDA   0x05 // Read-Only, expand-down, accessed
+#define SEG_DATA_RDWREXPD  0x06 // Read/Write, expand-down
+#define SEG_DATA_RDWREXPDA 0x07 // Read/Write, expand-down, accessed
+#define SEG_CODE_EX        0x08 // Execute-Only
+#define SEG_CODE_EXA       0x09 // Execute-Only, accessed
+#define SEG_CODE_EXRD      0x0A // Execute/Read
+#define SEG_CODE_EXRDA     0x0B // Execute/Read, accessed
+#define SEG_CODE_EXC       0x0C // Execute-Only, conforming
+#define SEG_CODE_EXCA      0x0D // Execute-Only, conforming, accessed
+#define SEG_CODE_EXRDC     0x0E // Execute/Read, conforming
+#define SEG_CODE_EXRDCA    0x0F // Execute/Read, conforming, accessed
+ 
+#define GDT_CODE_PL0 SEG_DESCTYPE(1) | SEG_PRES(1) | SEG_SAVL(0) | \
+                     SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(1) | \
+                     SEG_PRIV(0)     | SEG_CODE_EXRD
+ 
+#define GDT_DATA_PL0 SEG_DESCTYPE(1) | SEG_PRES(1) | SEG_SAVL(0) | \
+                     SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(1) | \
+                     SEG_PRIV(0)     | SEG_DATA_RDWR
+ 
+#define GDT_CODE_PL3 SEG_DESCTYPE(1) | SEG_PRES(1) | SEG_SAVL(0) | \
+                     SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(1) | \
+                     SEG_PRIV(3)     | SEG_CODE_EXRD
+ 
+#define GDT_DATA_PL3 SEG_DESCTYPE(1) | SEG_PRES(1) | SEG_SAVL(0) | \
+                     SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(1) | \
+                     SEG_PRIV(3)     | SEG_DATA_RDWR
+ 
 
-
-void makeSegDescriptor(uint8_t *mem, struct SDVals sd) {
-
-	// puts in limit values
-	mem[1] = sd.limit & 0xff;
-	mem[0] = (sd.limit >> 8) & 0xff;
-	mem[6] = (sd.limit >> 16) & 0xf;
-
-
-	// puts in base values
-	mem[3] = sd.base & 0xff;
-	mem[2] = (sd.base >> 8) & 0xff;
-	mem[4] = (sd.base >> 16) & 0xff;
-	mem[7] = (sd.base >> 24) & 0xff;
-
-
-	// puts in the access byte
-	mem[5] = sd.aByte;
-
-	// puts in flags
-	mem[6] |= (sd.flags << 4);
+static struct gdt_entry gdt[6];
+void encodeGdtEntry(uint8_t *target, struct GDT source)
+{
+    
+    // Encode the limit
+    target[0] = source.limit & 0xFF;
+    target[1] = (source.limit >> 8) & 0xFF;
+    target[6] = (source.limit >> 16) & 0x0F;
+    
+    // Encode the base
+    target[2] = source.base & 0xFF;
+    target[3] = (source.base >> 8) & 0xFF;
+    target[4] = (source.base >> 16) & 0xFF;
+    target[7] = (source.base >> 24) & 0xFF;
+    
+    // Encode the access byte
+    target[5] = source.access_byte;
+    
+    // Encode the flags
+    target[6] |= (source.flags << 4);
 }
-
-
-void initGDTSegments() {
+ 
+void
+gdt_init(void)
+{
+	setgdt((size_t*) &gdt[0], 47);
 	
-	struct GDTRptr gdtr;
-	getgdt(&gdtr);
+	struct GDT nd = {0,0,0,0};
+	encodeGdtEntry((uint8_t*) &gdt[0], nd);
 
-	uint32_t *memStart = gdtr.base;
+	struct GDT kcd = {0, 0x000FFFFF, 0x9A, 0xC};
+	encodeGdtEntry((uint8_t*) &gdt[1], kcd);
 
-	// create null descriptor
-	struct SDVals nullDescriptor = {0, 0, 0, 0};
-	makeSegDescriptor((uint8_t*) memStart, nullDescriptor);
+	struct GDT kdd = {0, 0x000FFFFF, 0x92, 0xC};
+	encodeGdtEntry((uint8_t*) &gdt[2], kdd);
 
+	struct GDT ucd = {0, 0x000FFFFF, 0xFA, 0xC};
+	encodeGdtEntry((uint8_t*) &gdt[3], ucd);
 
-	// create kernel code segment
-	memStart += 2;
-	struct SDVals KCSegment = {0, 0xFFFFF, 0x9B, 0xC};
-	makeSegDescriptor((uint8_t*) memStart, KCSegment);
+	struct GDT udd = {0, 0x000FFFFF, 0xF2, 0xC};
+	encodeGdtEntry((uint8_t*) &gdt[4], udd);
 
-	// create kernel data segment
-	memStart += 2;
-	struct SDVals KDSegment = {0, 0xFFFFF, 0x93, 0xC};
-	makeSegDescriptor((uint8_t*) memStart, KDSegment);
-
-	// create user code segment
-	memStart += 2;
-	struct SDVals UCSegment = {0, 0xFFFFF, 0xFB, 0xC};
-	makeSegDescriptor((uint8_t*) memStart, UCSegment);
-
-
-	// create user data segment
-	memStart += 2;
-	struct SDVals UDSegment = {0, 0xFFFFF, 0xF3, 0xC};
-	makeSegDescriptor((uint8_t*) memStart, UDSegment);
-
-	// create task state segment
-	memStart += 2;
-	struct SDVals TSSSegment = {TSS_MEM, TSS_BLOCKS * TSS_BLOCK_SIZE, 0x89, 0x0};
-	makeSegDescriptor((uint8_t*) memStart, TSSSegment);
+	struct GDT tss = {0xC0400000, 0x1000, 0x89, 0xC};
+	encodeGdtEntry((uint8_t*) &gdt[5], tss);
 
 	flushGdt();
-
+ 
 }
-
-
 

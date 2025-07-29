@@ -122,32 +122,17 @@ _start:
 	# to 0xC07FFFFF
 	call initSecondPageTable
 
-	# sets up GDT
-	push $0xFFFF
-	push $0xC03FFFAC
-	call setgdt
-	add $6, %esp
-	call initGDTSegments
+	call gdt_init
 
-
-	# sets up IDT
-	# first limit is pushed then base
-	call initIDT
-#	push $0xFFFF
-#	push $0xC0412000
-	call setIdt
+	call idt_init
 
 	call kernelPageInit
 
 
+	sti
+
 	call _init
 
-
-
-	mov $0x10, %ax
-	mov %ax, %ds
-	mov %ax, %es
-	mov %ax, %ss
 
 	# Enter the high-level kernel.
 	call kernel_main

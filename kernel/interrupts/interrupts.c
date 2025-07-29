@@ -1,44 +1,46 @@
 #include "interrupts.h"
-
-extern void doubleFault();
-
-struct interruptsGateDescriptor dfGate;
-uintptr_t dfAddr = (uintptr_t) doubleFault;
+#include <stdbool.h>
 
 
 
-void initIDT() {
-	dfGate.offset1 = dfAddr & 0xFFFF;
-	dfGate.offset2 = dfAddr >> 16;
-	dfGate.segSelector = 0x08;
-	dfGate.zero = 0;
-	dfGate.typeAttributes = 0x8E;
 
-((struct interruptsGateDescriptor*)IDT_START)[8] = dfGate;
-	struct interruptsGateDescriptor divErrGate;
+__attribute__((aligned(0x10))) 
+static idt_entry_t idt[256]; // Create an array of IDT entries; aligned for performance
+static idtr_t idtr;
 
-	uintptr_t divErrorAddr = (uintptr_t) divError;
-	size_t offset = (size_t) divErrorAddr;
 
-	// get the first 16 bytes of the interrupt handler
-	divErrGate.offset1 = (offset) & 0xFFFF;
-
-	// get the next 16 bits of the interrupts handler
-	divErrGate.offset2 = (offset) >> 16;
-
-	// can be any except for the 0th index
-	divErrGate.segSelector = 0x08;
-
-	divErrGate.zero = 0;
-
-	divErrGate.typeAttributes = 0x8E;
-
-	struct interruptsGateDescriptor *idt = (struct interruptsGateDescriptor*) IDT_START;
-
-	// struct idtr IDTRptr;
-
-	// getIDT(&IDTRptr);
-
-	*idt = divErrGate;
-	
+__attribute__((noreturn))
+void exception_handler() {
+    __asm__ volatile ("cli; hlt"); // Completely hangs the computer
 }
+
+
+
+void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
+    idt_entry_t* descriptor = &idt[vector];
+
+    descriptor->isr_low        = (size_t)isr & 0xFFFF;
+    descriptor->kernel_cs      = 0x08; // this value can be whatever offset your kernel code selector is in your GDT
+    descriptor->attributes     = flags;
+    descriptor->isr_high       = (size_t)isr >> 16;
+    descriptor->reserved       = 0;
+}
+
+
+static bool vectors[IDT_MAX_DESCRIPTORS];
+
+extern void* isr_stub_table[];
+
+void idt_init() {
+    idtr.base = (uintptr_t)&idt[0];
+    idtr.limit = (uint16_t)sizeof(idt_entry_t) * IDT_MAX_DESCRIPTORS - 1;
+
+    for (uint8_t vector = 0; vector < 32; vector++) {
+        idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
+        vectors[vector] = true;
+    }
+
+    __asm__ volatile ("lidt %0" : : "m"(idtr)); // load the new IDT
+    __asm__ volatile ("sti"); // set the interrupt flag
+}
+
