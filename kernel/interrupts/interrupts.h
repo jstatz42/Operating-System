@@ -24,6 +24,7 @@ struct idtr {
 
 extern void divError();
 extern struct idtr *getIDT(struct idtr*);
+extern void setIdt(size_t*, uint16_t);
 void initIDT();
 
 

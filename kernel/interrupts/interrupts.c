@@ -5,16 +5,22 @@ extern void doubleFault();
 struct interruptsGateDescriptor dfGate;
 uintptr_t dfAddr = (uintptr_t) doubleFault;
 
-
+__attribute__((aligned(0x10))) 
+static struct interruptsGateDescriptor idt[256]; // Create an array of IDT entries; aligned for performance
 
 void initIDT() {
+
+	setIdt((size_t*) &idt[0], (uint16_t) sizeof(struct interruptsGateDescriptor) * 255);
+
+
+
 	dfGate.offset1 = dfAddr & 0xFFFF;
 	dfGate.offset2 = dfAddr >> 16;
 	dfGate.segSelector = 0x08;
 	dfGate.zero = 0;
 	dfGate.typeAttributes = 0x8E;
 
-((struct interruptsGateDescriptor*)IDT_START)[8] = dfGate;
+	idt[8] = dfGate;
 	struct interruptsGateDescriptor divErrGate;
 
 	uintptr_t divErrorAddr = (uintptr_t) divError;
@@ -33,12 +39,13 @@ void initIDT() {
 
 	divErrGate.typeAttributes = 0x8E;
 
-	struct interruptsGateDescriptor *idt = (struct interruptsGateDescriptor*) IDT_START;
+	// struct interruptsGateDescriptor *idt = (struct interruptsGateDescriptor*) IDT_START;
 
 	// struct idtr IDTRptr;
 
 	// getIDT(&IDTRptr);
 
-	*idt = divErrGate;
+	// *idt = divErrGate;
+	idt[0] = divErrGate;
 	
 }

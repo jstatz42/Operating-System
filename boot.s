@@ -123,19 +123,11 @@ _start:
 	call initSecondPageTable
 
 	# sets up GDT
-	push $0xFFFF
-	push $0xC03FFFAC
-	call setgdt
-	add $6, %esp
 	call initGDTSegments
 
 
 	# sets up IDT
-	# first limit is pushed then base
 	call initIDT
-#	push $0xFFFF
-#	push $0xC0412000
-	call setIdt
 
 	call kernelPageInit
 

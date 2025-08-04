@@ -1,4 +1,10 @@
 #include "gdt.h"
+#include <stdint.h>
+
+
+__attribute__((aligned(0x10)))
+static struct gdt_entry gdt[6];
+
 
 
 void makeSegDescriptor(uint8_t *mem, struct SDVals sd) {
@@ -26,41 +32,33 @@ void makeSegDescriptor(uint8_t *mem, struct SDVals sd) {
 
 void initGDTSegments() {
 	
-	struct GDTRptr gdtr;
-	getgdt(&gdtr);
-
-	uint32_t *memStart = gdtr.base;
+	setgdt((size_t*) &gdt[0], 47);
 
 	// create null descriptor
 	struct SDVals nullDescriptor = {0, 0, 0, 0};
-	makeSegDescriptor((uint8_t*) memStart, nullDescriptor);
+	makeSegDescriptor((uint8_t*) &gdt[0], nullDescriptor);
 
 
 	// create kernel code segment
-	memStart += 2;
 	struct SDVals KCSegment = {0, 0xFFFFF, 0x9B, 0xC};
-	makeSegDescriptor((uint8_t*) memStart, KCSegment);
+	makeSegDescriptor((uint8_t*) &gdt[1], KCSegment);
 
 	// create kernel data segment
-	memStart += 2;
 	struct SDVals KDSegment = {0, 0xFFFFF, 0x93, 0xC};
-	makeSegDescriptor((uint8_t*) memStart, KDSegment);
+	makeSegDescriptor((uint8_t*) &gdt[2], KDSegment);
 
 	// create user code segment
-	memStart += 2;
 	struct SDVals UCSegment = {0, 0xFFFFF, 0xFB, 0xC};
-	makeSegDescriptor((uint8_t*) memStart, UCSegment);
+	makeSegDescriptor((uint8_t*) &gdt[3], UCSegment);
 
 
 	// create user data segment
-	memStart += 2;
 	struct SDVals UDSegment = {0, 0xFFFFF, 0xF3, 0xC};
-	makeSegDescriptor((uint8_t*) memStart, UDSegment);
+	makeSegDescriptor((uint8_t*) &gdt[4], UDSegment);
 
 	// create task state segment
-	memStart += 2;
 	struct SDVals TSSSegment = {TSS_MEM, TSS_BLOCKS * TSS_BLOCK_SIZE, 0x89, 0x0};
-	makeSegDescriptor((uint8_t*) memStart, TSSSegment);
+	makeSegDescriptor((uint8_t*) &gdt[5], TSSSegment);
 
 	flushGdt();
 

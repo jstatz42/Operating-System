@@ -1,7 +1,8 @@
 .section .data
-#idtr:
-#	.word 0 # 16 bit limit
-#	.long 0 # 32 bit base
+.align 0x10
+idtr:
+	.word 0 # 16 bit limit
+	.long 0 # 32 bit base
 
 divString: .asciz "Division error handler"
 
@@ -10,10 +11,7 @@ divString: .asciz "Division error handler"
 
 
 .section .text
-.align 8
-idtr:
-    .word 0x07FF
-    .long 0xC0412000   # your IDT base
+
 
 
 # call in form of setIdt(base, limit)
@@ -21,12 +19,12 @@ idtr:
 setIdt:
 	
 	# set the limit storage
-#	mov 8(%esp), %ax
-#	mov %ax, idtr
+	mov 8(%esp), %ax
+	mov %ax, idtr
 
 	# set the base storage
-#	mov 4(%esp), %eax
-#	mov %eax, idtr + 2
+	mov 4(%esp), %eax
+	mov %eax, idtr + 2
 
 	# sets the gdtr register
 	lidt idtr

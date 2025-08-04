@@ -2,6 +2,7 @@
 #define GDT_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define GDT_START 0xC03FFFAC
 #define GDT_LIMIT 0xFFFF
@@ -17,8 +18,17 @@ struct SDVals {
 	uint8_t aByte;
 	unsigned int flags: 4;
 
-};
+}__attribute__((packed));
 
+struct gdt_entry {
+	uint16_t limit1;
+	uint16_t base1;
+	uint8_t base2;
+	uint8_t access_byte;
+	unsigned int limit2: 4;
+	unsigned int flags: 4;
+	uint8_t base3;
+}__attribute__((packed));
 
 struct GDTRptr {
 	uint16_t limit;
@@ -29,11 +39,10 @@ struct GDTRptr {
 
 void makeSegDescriptor(uint8_t*, struct SDVals);
 void getgdt(struct GDTRptr*);
-void setgdt(uint32_t, uint16_t);
 void initGDTSegments();
-void flushGdt();
 void completeFlush();
-
+extern void setgdt(size_t*, uint16_t);
+extern void flushGdt();
 
 
 
