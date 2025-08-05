@@ -1,16 +1,16 @@
 #include "interrupts.h"
+#include <stdbool.h>
 
-extern void doubleFault();
 
-struct interruptsGateDescriptor dfGate;
 uintptr_t dfAddr = (uintptr_t) doubleFault;
 
 __attribute__((aligned(0x10))) 
-static struct interruptsGateDescriptor idt[256]; // Create an array of IDT entries; aligned for performance
+static gdtEntry_t idt[256]; // Create an array of IDT entries; aligned for performance
 
 void initIDT() {
 
-	setIdt((size_t*) &idt[0], (uint16_t) sizeof(struct interruptsGateDescriptor) * 255);
+	setIdt((size_t*) &idt[0], (uint16_t) sizeof(gdtEntry_t) * 255);
+	gdtEntry_t dfGate;
 
 
 
@@ -21,10 +21,9 @@ void initIDT() {
 	dfGate.typeAttributes = 0x8E;
 
 	idt[8] = dfGate;
-	struct interruptsGateDescriptor divErrGate;
+	gdtEntry_t divErrGate;
 
-	uintptr_t divErrorAddr = (uintptr_t) divError;
-	size_t offset = (size_t) divErrorAddr;
+	size_t offset = (size_t) divError;
 
 	// get the first 16 bytes of the interrupt handler
 	divErrGate.offset1 = (offset) & 0xFFFF;
@@ -48,4 +47,10 @@ void initIDT() {
 	// *idt = divErrGate;
 	idt[0] = divErrGate;
 	
+
 }
+
+
+
+
+

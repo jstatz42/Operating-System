@@ -1,12 +1,10 @@
-.section .data
 gdtr: 
 	.word 0 # 16-bit limit
 	.long 0 # 32-bit base
 
 
 
-# call in form of setgdt(base, limit)
-.section .text
+# call in form of setgdt(limit, base)
 .globl setgdt
 setgdt:
 	

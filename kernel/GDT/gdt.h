@@ -1,24 +1,18 @@
 #ifndef GDT_H
 #define GDT_H
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stddef.h>
 
-#define GDT_START 0xC03FFFAC
-#define GDT_LIMIT 0xFFFF
-#define TSS_MEM 0xC040FFAC
-#define TSS_BLOCKS 4
-#define TSS_BLOCK_SIZE 104
 
-
-struct SDVals {
-
+struct GDT {
 	uint32_t base;
 	unsigned int limit: 20;
-	uint8_t aByte;
+	uint8_t access_byte;
 	unsigned int flags: 4;
+} __attribute__((packed));
 
-}__attribute__((packed));
 
 struct gdt_entry {
 	uint16_t limit1;

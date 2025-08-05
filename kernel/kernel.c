@@ -2,7 +2,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "vga/vga.h"
-#include "interrupts/interrupts.h"
 
 
 
@@ -12,23 +11,9 @@ void kernel_main(void) {
 	terminal_initialize();
 	terminal_writestring("Hello, kernel World1!\n");
 
-	struct idtr igd;
-
-	getIDT(&igd);
-
-        size_t idt[2];
-        __asm__ volatile ("sidt %0" : "=m"(idt));
-
-    // Trigger #DE manually
-    __asm__ volatile (
-        "movl $1, %eax\n\t"
-        "xorl %edx, %edx\n\t"
-        "divl %edx\n\t"
-    );
 
 
-	while (1) { __asm__ volatile ("hlt"); }
-
+	uint8_t x = 1/0;
 
 	// drawing a triangle
 	

@@ -5,11 +5,6 @@ idtr:
 	.long 0 # 32 bit base
 
 divString: .asciz "Division error handler"
-
-
-
-
-
 .section .text
 
 

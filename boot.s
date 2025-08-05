@@ -129,17 +129,14 @@ _start:
 	# sets up IDT
 	call initIDT
 
+
 	call kernelPageInit
 
 
+	sti
+
 	call _init
 
-
-
-	mov $0x10, %ax
-	mov %ax, %ds
-	mov %ax, %es
-	mov %ax, %ss
 
 	# Enter the high-level kernel.
 	call kernel_main

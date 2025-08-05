@@ -5,16 +5,13 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define IDT_START 0xC0412000
-
-
-struct interruptsGateDescriptor {
+typedef struct gdtEntry{
 	uint16_t offset1; // first 16 bits of the ofset
 	uint16_t segSelector; // code segment selector in GDT
 	uint8_t zero; // all 0
 	uint8_t typeAttributes;
 	uint16_t offset2;
-}__attribute__((packed));
+}__attribute__((packed)) gdtEntry_t;
 
 
 struct idtr {
@@ -25,8 +22,8 @@ struct idtr {
 extern void divError();
 extern struct idtr *getIDT(struct idtr*);
 extern void setIdt(size_t*, uint16_t);
+extern void doubleFault();
 void initIDT();
-
 
 
 #endif
