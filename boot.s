@@ -123,7 +123,7 @@ _start:
 	call initSecondPageTable
 
 	# sets up GDT
-	call initGDTSegments
+	call initGDT 
 
 
 	# sets up IDT

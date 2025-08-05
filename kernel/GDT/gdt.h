@@ -31,10 +31,10 @@ struct GDTRptr {
 
 
 
-void makeSegDescriptor(uint8_t*, struct SDVals);
 void getgdt(struct GDTRptr*);
 void initGDTSegments();
 void completeFlush();
+void encodeGdtEntry(uint8_t*, struct GDT);
 extern void setgdt(size_t*, uint16_t);
 extern void flushGdt();
 

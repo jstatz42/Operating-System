@@ -1,8 +1,5 @@
-// Used for creating GDT segment descriptors in 64-bit integer form.
- 
 #include "gdt.h"
 #include <stdint.h>
-<<<<<<< HEAD
 
 
 __attribute__((aligned(0x10)))
@@ -10,8 +7,7 @@ static struct gdt_entry gdt[6];
 
 
 static struct gdt_entry gdt[6];
-void encodeGdtEntry(uint8_t *target, struct GDT source)
-{
+void encodeGdtEntry(uint8_t *target, struct GDT source) {
     
     // Encode the limit
     target[0] = source.limit & 0xFF;
@@ -31,9 +27,7 @@ void encodeGdtEntry(uint8_t *target, struct GDT source)
     target[6] |= (source.flags << 4);
 }
  
-void
-gdt_init(void)
-{
+void initGDT(void) {
 	setgdt((size_t*) &gdt[0], 47);
 	
 
