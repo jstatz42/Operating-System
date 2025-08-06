@@ -9,11 +9,7 @@
 
 void kernel_main(void) {
 	terminal_initialize();
-	terminal_writestring("Hello, kernel World1!\n");
-
-
-
-	uint8_t x = 1/0;
+	terminal_writestring("Hello, kernel World!\n");
 
 	// drawing a triangle
 	

@@ -5,8 +5,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define GDT_LIMIT 47
 
-struct GDT {
+struct GDTData {
 	uint32_t base;
 	unsigned int limit: 20;
 	uint8_t access_byte;
@@ -34,7 +35,7 @@ struct GDTRptr {
 void getgdt(struct GDTRptr*);
 void initGDTSegments();
 void completeFlush();
-void encodeGdtEntry(uint8_t*, struct GDT);
+void encodeGdtEntry(uint8_t*, struct GDTData);
 extern void setgdt(size_t*, uint16_t);
 extern void flushGdt();
 

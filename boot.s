@@ -132,6 +132,8 @@ _start:
 
 	call kernelPageInit
 
+	#call initPIC
+
 
 	sti
 

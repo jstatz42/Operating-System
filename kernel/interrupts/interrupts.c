@@ -1,53 +1,58 @@
 #include "interrupts.h"
 #include <stdbool.h>
-
-
-uintptr_t dfAddr = (uintptr_t) doubleFault;
+#include <stdint.h>
 
 __attribute__((aligned(0x10))) 
 static gdtEntry_t idt[256]; // Create an array of IDT entries; aligned for performance
 
+
+void fillGate(gdtEntry_t *gate, size_t addr, uint8_t seg, uint8_t type) {
+	(*gate).offset1 = addr & 0xFFFF;
+	(*gate).offset2 = addr >> 16;
+	(*gate).segSelector = seg;
+	(*gate).zero = 0;
+	(*gate).typeAttributes = type;
+}
+
+
+void assignUnhandledExceptions() {
+
+	gdtEntry_t genGate;
+	
+	uintptr_t geAddr = (uintptr_t) generalException;
+
+	// creates general exception gate
+	fillGate(&genGate, geAddr, KERNEL_CODE_SELECTOR, TRAP_GATE);
+
+	for (int i = 0; i < 32; i++) {
+		idt[i] = genGate;
+	}
+}
+
 void initIDT() {
 
-	setIdt((size_t*) &idt[0], (uint16_t) sizeof(gdtEntry_t) * 255);
+	setIdt((size_t*) &idt[0], (uint16_t) (sizeof(gdtEntry_t) * NUM_IDT_DESCRIPTORS - 1));
+
+	// makes double fault gate
 	gdtEntry_t dfGate;
 
-
-
-	dfGate.offset1 = dfAddr & 0xFFFF;
-	dfGate.offset2 = dfAddr >> 16;
-	dfGate.segSelector = 0x08;
-	dfGate.zero = 0;
-	dfGate.typeAttributes = 0x8E;
-
+	uintptr_t dfAddr = (uintptr_t) doubleFault;
+fillGate(&dfGate, dfAddr, KERNEL_CODE_SELECTOR, TRAP_GATE);
 	idt[8] = dfGate;
+
+
+	// makes division error gate
 	gdtEntry_t divErrGate;
-
 	size_t offset = (size_t) divError;
-
-	// get the first 16 bytes of the interrupt handler
-	divErrGate.offset1 = (offset) & 0xFFFF;
-
-	// get the next 16 bits of the interrupts handler
-	divErrGate.offset2 = (offset) >> 16;
-
-	// can be any except for the 0th index
-	divErrGate.segSelector = 0x08;
-
-	divErrGate.zero = 0;
-
-	divErrGate.typeAttributes = 0x8E;
-
-	// struct interruptsGateDescriptor *idt = (struct interruptsGateDescriptor*) IDT_START;
-
-	// struct idtr IDTRptr;
-
-	// getIDT(&IDTRptr);
-
-	// *idt = divErrGate;
+	fillGate(&divErrGate, offset, KERNEL_CODE_SELECTOR, TRAP_GATE);
 	idt[0] = divErrGate;
-	
 
+
+	// makes keyboard interrupt gate
+	gdtEntry_t keyGate;	
+	uintptr_t kiAddr = (uintptr_t) keyInterrupt;
+	fillGate(&keyGate, kiAddr, KERNEL_CODE_SELECTOR, INTERRUPT_GATE);
+	idt[33] = keyGate;
 }
 
 

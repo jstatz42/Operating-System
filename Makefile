@@ -1,8 +1,8 @@
 CC=~/opt/cross/bin/i686-elf-gcc
 CCA=~/opt/cross/bin/i686-elf-as
-CFLAGS=-std=gnu99 -ffreestanding -O0 -Wall -Wextra -g
+CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -g
 VGA=kernel/vga/vga.c kernel/vga/vga.h
-OBJS=objects/boot.o objects/kernel.o objects/vga.o objects/string.o objects/gdt.o objects/asmgdt.o objects/paging.o objects/interrupts.o objects/interC.o
+OBJS=objects/boot.o objects/kernel.o objects/vga.o objects/string.o objects/gdt.o objects/asmgdt.o objects/paging.o objects/interrupts.o objects/interC.o objects/pic.o objects/io.o
 CRTBEGIN=$(shell $(CC) $(CFLAGS) -print-file-name=crtbegin.o)
 CRTEND=$(shell $(CC) $(CFLAGS) -print-file-name=crtend.o)
 CRTI=kernel/cri/crti.s
@@ -14,10 +14,18 @@ STRINGS=libc/include/string.c libc/include/string.h
 PAGING=kernel/paging/paging.c
 INTERRUPTS=kernel/interrupts/interrupts.s
 INTERC=kernel/interrupts/interrupts.c
+PIC=devices/pic/pic.c
+IO=libc/include/io.c
 
 .PHONY: all clean qemu debug
 
-all: interC.o interrupts.o paging.o asmgdt.o gdt.o string.o crti.o crtn.o vga.o kernel.o boot.o myos.iso
+all: pic.o io.o interC.o interrupts.o paging.o asmgdt.o gdt.o string.o crti.o crtn.o vga.o kernel.o boot.o myos.iso
+
+pic.o: $(PIC)
+	$(CC) -c $(PIC) -o objects/pic.o $(CFLAGS)
+
+io.o: $(IO)
+	$(CC) -c $(IO) -o objects/io.o $(CFLAGS)
 
 interC.o: $(INTERC)
 	$(CC) -c $(INTERC) -o objects/interC.o $(CFLAGS)

@@ -5,6 +5,7 @@ idtr:
 	.long 0 # 32 bit base
 
 divString: .asciz "Division error handler"
+keyboardInterrupt: .asciz "Keyboard interrupt handler"
 .section .text
 
 
@@ -36,22 +37,51 @@ getIDT:
 
 .globl divError
 divError:
+	pushal
 
 	# prints that this is a division error
-#	mov $divString, %eax
-#	push %eax
-#	call terminal_writestring
-	#add $4, %esp
+	mov $divString, %eax
+	push %eax
+	call terminal_writestring
+	add $4, %esp
 
-	#jmp end
-
-	cli
-	1:  hlt
-    	jmp 1b
+	popal
+	jmp end
 	
 .globl doubleFault
 doubleFault:
     cli
 1:  hlt
     jmp 1b
+
+
+# exceptions that have not yet been handled will halt the computer
+.globl generalException
+generalException:
+	cli
+1:	hlt
+	jmp 1b
+
+
+
+.global keyInterrupt
+keyInterrupt:
+	pushal
+
+	# prints that this is a keyboard interrupt
+	mov $keyboardInterrupt, %eax
+	push %eax
+	call terminal_writestring
+	add $4, %esp
+
+	popal
+	jmp end
+
+
+
+
+
+
+
+
 
