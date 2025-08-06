@@ -125,14 +125,13 @@ _start:
 	# sets up GDT
 	call initGDT 
 
-
 	# sets up IDT
 	call initIDT
 
 
 	call kernelPageInit
 
-	#call initPIC
+	call initPIC
 
 
 	sti
@@ -148,6 +147,6 @@ _start:
 end: 
 
 	# Infinite loop if the system has nothing more to do.
-	cli
+	#cli
 1:	hlt
 	jmp 1b

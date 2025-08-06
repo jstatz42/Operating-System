@@ -64,7 +64,7 @@ generalException:
 
 
 
-.global keyInterrupt
+.globl keyInterrupt
 keyInterrupt:
 	pushal
 
