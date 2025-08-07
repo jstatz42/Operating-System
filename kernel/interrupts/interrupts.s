@@ -74,6 +74,13 @@ keyInterrupt:
 	call terminal_writestring
 	add $4, %esp
 
+	# reads input from keyboard
+	inb $0x60, %al
+
+	# tells the PIC to reset the correct bit
+	movb $0x20, %al
+	outb %al, $0x20
+
 	popal
 	jmp end
 

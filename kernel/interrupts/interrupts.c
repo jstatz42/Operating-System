@@ -37,7 +37,7 @@ void initIDT() {
 	gdtEntry_t dfGate;
 
 	uintptr_t dfAddr = (uintptr_t) doubleFault;
-fillGate(&dfGate, dfAddr, KERNEL_CODE_SELECTOR, TRAP_GATE);
+	fillGate(&dfGate, dfAddr, KERNEL_CODE_SELECTOR, TRAP_GATE);
 	idt[8] = dfGate;
 
 

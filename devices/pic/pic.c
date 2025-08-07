@@ -31,7 +31,7 @@ void remapPIC(uint16_t offset1, uint16_t offset2) {
 
 
 
-void PIC_sendEOI(uint8_t irq) {
+void sendEOI_PIC(uint8_t irq) {
 
 	if(irq >= 8) {
 		outb(PIC2_COMMAND,PIC_EOI);
