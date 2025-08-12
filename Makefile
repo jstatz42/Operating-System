@@ -2,7 +2,12 @@ CC=~/opt/cross/bin/i686-elf-gcc
 CCA=~/opt/cross/bin/i686-elf-as
 CFLAGS=-std=gnu99 -ffreestanding -O0 -Wall -Wextra -g
 VGA=kernel/vga/vga.c kernel/vga/vga.h
-OBJS=objects/boot.o objects/kernel.o objects/vga.o objects/string.o objects/gdt.o objects/asmgdt.o objects/paging.o objects/interrupts.o objects/interC.o objects/pic.o objects/io.o objects/keyboard.o
+INTERRUPT_OBJS=objects/interrupts.o objects/interC.o 
+GDT_OBJS=objects/gdt.o objects/asmgdt.o
+KERNEL_OBJS=objects/kernel.o objects/vga.o objects/paging.o $(GDT_OBJS) $(INTERRUPT_OBJS)
+LIB_OBJS=objects/string.o objects/io.o
+DEVICE_OBJS=objects/pic.o objects/keyboard.o 
+OBJS=objects/boot.o $(DEVICE_OBJS) $(LIB_OBJS) $(KERNEL_OBJS)
 CRTBEGIN=$(shell $(CC) $(CFLAGS) -print-file-name=crtbegin.o)
 CRTEND=$(shell $(CC) $(CFLAGS) -print-file-name=crtend.o)
 CRTI=kernel/cri/crti.s
