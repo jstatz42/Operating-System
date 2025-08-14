@@ -11,6 +11,8 @@
 #define R_SHIFT_RELEASED 0xB6
 #define CAPS_LOCK_PRESSED 0x3A
 #define CAPS_LOCK_RELEASED 0xBA
+#define MAX_KEY 0x39
+#define INPUT_BUFFER 0x60
 #define ENABLED 1
 #define DISABLED 0
 #define CONTINUE 0

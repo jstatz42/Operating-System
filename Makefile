@@ -7,7 +7,8 @@ GDT_OBJS=objects/gdt.o objects/asmgdt.o
 KERNEL_OBJS=objects/kernel.o objects/vga.o objects/paging.o $(GDT_OBJS) $(INTERRUPT_OBJS)
 LIB_OBJS=objects/string.o objects/io.o
 DEVICE_OBJS=objects/pic.o objects/keyboard.o 
-OBJS=objects/boot.o $(DEVICE_OBJS) $(LIB_OBJS) $(KERNEL_OBJS)
+DS_OBJS=objects/stack.o
+OBJS=objects/boot.o $(DEVICE_OBJS) $(LIB_OBJS) $(KERNEL_OBJS) $(DS_OBJS)
 CRTBEGIN=$(shell $(CC) $(CFLAGS) -print-file-name=crtbegin.o)
 CRTEND=$(shell $(CC) $(CFLAGS) -print-file-name=crtend.o)
 CRTI=kernel/cri/crti.s
@@ -22,10 +23,14 @@ INTERC=kernel/interrupts/interrupts.c
 PIC=devices/pic/pic.c
 IO=libc/include/io.c
 KEY=devices/keyboard/keyboard.c
+STACK=dataStructures/stack/stack.c
 
 .PHONY: all clean qemu debug
 
-all: keyboard.o pic.o io.o interC.o interrupts.o paging.o asmgdt.o gdt.o string.o crti.o crtn.o vga.o kernel.o boot.o myos.iso
+all: stack.o keyboard.o pic.o io.o interC.o interrupts.o paging.o asmgdt.o gdt.o string.o crti.o crtn.o vga.o kernel.o boot.o myos.iso
+
+stack.o: $(STACK)
+	$(CC) -c $(STACK) -o objects/stack.o $(CFLAGS)
 
 keyboard.o: $(KEY)
 	$(CC) -c $(KEY) -o objects/keyboard.o $(CFLAGS)

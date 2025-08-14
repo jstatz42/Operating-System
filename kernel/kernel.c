@@ -3,9 +3,7 @@
 #include <stdint.h>
 #include "vga/vga.h"
 
-
-
-
+extern bool startNewlineStack;
 
 void kernel_main(void) {
 	terminal_initialize();
@@ -42,5 +40,6 @@ void kernel_main(void) {
 
 	terminal_setcolor(vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK));
 	terminal_putchar('\n');
+	startNewlineStack = true;
 
 }

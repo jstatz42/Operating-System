@@ -7,7 +7,7 @@
 
 
 static char scanCodes[] = {0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-	'-', '=', 0, 0, 'q', 'w', 'e', 'r', 't', 'y', 'u' ,'i', 'o', 'p', '[', ']',
+	'-', '=', 8, 0, 'q', 'w', 'e', 'r', 't', 'y', 'u' ,'i', 'o', 'p', '[', ']',
 	'\n', 0, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\',
 	'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 0, 0, 0, ' '};
 
@@ -45,14 +45,14 @@ uint8_t checkForSpecialKeys(uint8_t code) {
 
 void executeKey() {
 
-	uint8_t keyCode = inb(0x60);
+	uint8_t keyCode = inb(INPUT_BUFFER);
 
 	if (checkForSpecialKeys(keyCode)) {
 		return;
 	}
 
 	// do not print if code does not have a char
-	if (keyCode > 0x39 || !keyCode) {
+	if (keyCode > MAX_KEY || !scanCodes[keyCode]) {
 		return;
 	}
 
