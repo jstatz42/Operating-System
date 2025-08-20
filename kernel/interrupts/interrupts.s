@@ -6,6 +6,7 @@ idtr:
 
 divString: .asciz "Division error handler"
 keyboardInterrupt: .asciz "Keyboard interrupt handler"
+timerString: .asciz "timer "
 .section .text
 
 
@@ -68,24 +69,29 @@ generalException:
 keyInterrupt:
 	pushal
 
-	# prints that this is a keyboard interrupt
-#	mov $keyboardInterrupt, %eax
-#	push %eax
-#	call terminal_writestring
-#	add $4, %esp
-
 	call executeKey
 
-	# tells the PIC to reset the correct bit
-	movb $0x20, %al
-	outb %al, $0x20
+	# tells the PIC to reset bit
+	push $0x20
+	call sendEOI_PIC
+	add $1, %esp
 
 	popal
 	jmp end
 
 
 
+.global timerInterrupt
+timerInterrupt:
+	pushal
 
+	# tells the PIC to reset the highest priority bit
+	push $0x20
+	call sendEOI_PIC
+	add $4, %esp
+
+	popal
+	iret
 
 
 

@@ -133,6 +133,9 @@ _start:
 
 	call initPIC
 
+	call terminal_initialize
+
+	call initPIT
 
 	sti
 

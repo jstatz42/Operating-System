@@ -53,6 +53,13 @@ void initIDT() {
 	uintptr_t kiAddr = (uintptr_t) keyInterrupt;
 	fillGate(&keyGate, kiAddr, KERNEL_CODE_SELECTOR, INTERRUPT_GATE);
 	idt[33] = keyGate;
+
+
+	// makes timer interrupt gate
+	gdtEntry_t timerGate;
+	uintptr_t timerAddr = (uintptr_t) timerInterrupt;
+	fillGate(&timerGate, timerAddr, KERNEL_CODE_SELECTOR, INTERRUPT_GATE);
+	idt[32] = timerGate;
 }
 
 

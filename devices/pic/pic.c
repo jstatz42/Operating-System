@@ -23,8 +23,8 @@ void remapPIC(uint16_t offset1, uint16_t offset2) {
 	outb(PIC2_DATA, ICW4_8086);
 	io_wait();
 
-	// Unmask both PICs.
-	outb(PIC1_DATA, ~2);
+	// unmasm IRQs
+	outb(PIC1_DATA, ~3);
 	// outb(PIC2_DATA, 0);
 }
 

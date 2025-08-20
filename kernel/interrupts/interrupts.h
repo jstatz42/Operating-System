@@ -30,6 +30,7 @@ extern void setIdt(size_t*, uint16_t);
 extern void doubleFault();
 extern void generalException();
 extern void keyInterrupt();
+extern void timerInterrupt();
 void initIDT();
 void assignUnhandledExceptions();
 
