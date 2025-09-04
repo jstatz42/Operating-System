@@ -74,10 +74,10 @@ keyInterrupt:
 	# tells the PIC to reset bit
 	push $0x20
 	call sendEOI_PIC
-	add $1, %esp
+	add $4, %esp
 
 	popal
-	jmp end
+	iret
 
 
 
