@@ -9,4 +9,4 @@ This is a 32-bit operating system that utilizes the GRUB bootloader and qemu to 
 - PIT: programmable interval timer has been configured 
 - PIC: programmable interrupt contorller has been configured with the keyboard and timer
 - able to use constructor attributes for functions
- Operating-System
+- Interrupt handlers: The keyboard interrupt handler, the timer interrupt handler, and the division error handler have been implemented
